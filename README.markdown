@@ -6,6 +6,8 @@ This can be used as a replacement for mysqldump or pg_dump, but only for the dat
 
 Any database that has an ActiveRecord adapter should work.
 
+This branch is for Rails 2 development.
+
 ## Installation
 
 This plugin can now be installed as a gem via 
