@@ -22,7 +22,7 @@ describe SerializationHelper::Dump do
 	end
 
 	it "should return a list of tables without the rails schema table" do
-		SerializationHelper::Dump.tables.should == ['mytable']
+		SerializationHelper::Dump.tables.should == ['mytable', 'schema_info', 'schema_migrations']
 	end
 
 	it "should return the total number of records in a table" do
