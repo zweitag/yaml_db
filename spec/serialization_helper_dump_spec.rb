@@ -21,7 +21,7 @@ describe SerializationHelper::Dump do
 		SerializationHelper::Dump.table_column_names('mytable').should == [ 'a', 'b' ]
 	end
 
-	it "should return a list of tables without the rails schema table" do
+	it "should return a list of tables including the rails schema table" do
 		SerializationHelper::Dump.tables.should == ['mytable', 'schema_info', 'schema_migrations']
 	end
 
