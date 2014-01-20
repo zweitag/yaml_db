@@ -6,13 +6,15 @@ This can be used as a replacement for mysqldump or pg_dump, but only for the dat
 
 Any database that has an ActiveRecord adapter should work.  This gem is now Rails 3 only.  For Rails 2, clone and checkout the Rails2 branch.
 
-[![Build Status](https://secure.travis-ci.org/ludicast/yaml_db.png)](http://travis-ci.org/ludicast/yaml_db)
+This is a fork of the ludicast version which makes sure schema tables are being dumped, too.
+
+[![Build Status](https://secure.travis-ci.org/zweitag/yaml_db.png)](http://travis-ci.org/zweitag/yaml_db)
 
 ## Installation
 
 Simply add to your Gemfile:
 
-    gem 'yaml_db'
+    gem 'yaml_db_with_schema_tables'
 
 All rake tasks will then be available to you.
 
