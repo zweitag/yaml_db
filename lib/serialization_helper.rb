@@ -158,7 +158,7 @@ module SerializationHelper
     end
 
     def self.tables
-      ActiveRecord::Base.connection.tables.reject { |table| ['schema_info', 'schema_migrations'].include?(table) }
+      ActiveRecord::Base.connection.tables
     end
 
     def self.dump_table(io, table)
