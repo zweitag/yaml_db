@@ -75,16 +75,19 @@ module SerializationHelper
       reset_pk_sequence!(table)
     end
 
-    def self.load_records(table, column_names, records)
+    def self.load_records(table, column_names, records, records_per_page=1000)
       if column_names.nil?
         return
       end
       columns = column_names.map{|cn| ActiveRecord::Base.connection.columns(table).detect{|c| c.name == cn}}
       quoted_column_names = column_names.map { |column| ActiveRecord::Base.connection.quote_column_name(column) }.join(',')
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
-      records.each do |record|
-        quoted_values = record.zip(columns).map{|c| ActiveRecord::Base.connection.quote(c.first, c.last)}.join(',')
-        ActiveRecord::Base.connection.execute("INSERT INTO #{quoted_table_name} (#{quoted_column_names}) VALUES (#{quoted_values})")
+      
+      0.step(records.count-1, records_per_page) do |offset|
+        all_quoted_values = records[offset, records_per_page].map do |record|
+          '(' + record.zip(columns).map{|c| ActiveRecord::Base.connection.quote(c.first, c.last)}.join(',') + ')'
+        end.join(', ')
+        ActiveRecord::Base.connection.execute("INSERT INTO #{quoted_table_name} (#{quoted_column_names}) VALUES #{all_quoted_values}")
       end
     end
 
