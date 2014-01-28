@@ -6,10 +6,6 @@ describe SerializationHelper::Utils, " convert records utility method" do
 		ActiveRecord::Base.stub(:connection).and_return(stub('connection').as_null_object)
 	end
 
-	it "returns an array of hash values using an array of ordered keys" do
-		SerializationHelper::Utils.unhash({ 'a' => 1, 'b' => 2 }, [ 'b', 'a' ]).should == [ 2, 1 ]
-    end
-
 	it "should unhash each hash an array using an array of ordered keys" do
 		SerializationHelper::Utils.unhash_records([ { 'a' => 1, 'b' => 2 }, { 'a' => 3, 'b' => 4 } ], [ 'b', 'a' ]).should == [ [ 2, 1 ], [ 4, 3 ] ]
 	end

@@ -45,7 +45,7 @@ module YamlDb
 
       each_table_page(table) do |records|
         rows = SerializationHelper::Utils.unhash_records(records, column_names)
-        io.write(YamlDb::Utils.chunk_records(records))
+        io.write(YamlDb::Utils.chunk_records(rows))
       end
     end
 
