@@ -6,7 +6,7 @@ This can be used as a replacement for mysqldump or pg_dump, but only for the dat
 
 Any database that has an ActiveRecord adapter should work.  This gem is now Rails 3 only.  For Rails 2, clone and checkout the Rails2 branch.
 
-This is a fork of the ludicast version which makes sure schema tables are being dumped, too.
+_This is a fork of the ludicast version which makes sure schema tables are being dumped, too. Also, JSON is supported as an alternative serialization format._
 
 [![Build Status](https://secure.travis-ci.org/zweitag/yaml_db.png)](http://travis-ci.org/zweitag/yaml_db)
 
@@ -28,7 +28,7 @@ Further, there are tasks db:dump and db:load which do the entire database (the e
     rake db:data:dump_dir   ->   Dump contents of database to curr_dir_name/tablename.extension (defaults to yaml)
     rake db:data:load_dir   ->   Load contents of db/data_dir into database
 
-In addition, we have plugins whereby you can export your database to/from various formats.  We only deal with yaml and csv right now, but you can easily write tools for your own formats (such as Excel or XML).  To use another format, just load setting the "class"  parameter to the class you are using.  This defaults to "YamlDb::Helper" which is a refactoring of the old yaml_db code.  We'll shorten this to use class nicknames in a little bit.
+In addition, we have plugins whereby you can export your database to/from various formats.  We only deal with yaml and csv right now, but you can easily write tools for your own formats (such as Excel or XML).  To use another format, just load setting the "class"  parameter to the class you are using.  This defaults to "YamlDb::Helper" which is a refactoring of the old yaml_db code. Set it to "JsonDb::Helper" in order to use JSON serialization (much faster!) instead.
 
 ## Examples
 
