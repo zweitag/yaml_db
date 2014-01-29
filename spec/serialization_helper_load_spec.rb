@@ -45,8 +45,7 @@ describe SerializationHelper::Load do
         ActiveRecord::Base.connection.stub!(:quote).with(2, mcb).and_return("'2'")
         ActiveRecord::Base.connection.stub!(:quote).with(3, mca).and_return("'3'")
         ActiveRecord::Base.connection.stub!(:quote).with(4, mcb).and_return("'4'")
-        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,b) VALUES ('1','2')")
-        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,b) VALUES ('3','4')")
+        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,b) VALUES ('1','2'), ('3','4')")
 
         SerializationHelper::Load.load_records('mytable', ['a', 'b'], [[1, 2], [3, 4]])
     end
@@ -61,8 +60,7 @@ describe SerializationHelper::Load do
         ActiveRecord::Base.connection.stub!(:quote).with(2, mccount).and_return("'2'")
         ActiveRecord::Base.connection.stub!(:quote).with(3, mca).and_return("'3'")
         ActiveRecord::Base.connection.stub!(:quote).with(4, mccount).and_return("'4'")
-        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,\"count\") VALUES ('1','2')")
-        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,\"count\") VALUES ('3','4')")
+        ActiveRecord::Base.connection.should_receive(:execute).with("INSERT INTO mytable (a,\"count\") VALUES ('1','2'), ('3','4')")
 
         SerializationHelper::Load.load_records('mytable', ['a', 'count'], [[1, 2], [3, 4]])
     end
