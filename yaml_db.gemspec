@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
     "about.yml",
     "init.rb",
     "lib/csv_db.rb",
+    "lib/json_db.rb",
     "lib/serialization_helper.rb",
     "lib/tasks/yaml_db_tasks.rake",
     "lib/yaml_db.rb",
@@ -32,6 +33,8 @@ Gem::Specification.new do |s|
     "spec/serialization_helper_dump_spec.rb",
     "spec/serialization_helper_load_spec.rb",
     "spec/serialization_utils_spec.rb",
+    "spec/json_dump_spec.rb",
+    "spec/json_load_spec.rb",
     "spec/yaml_dump_spec.rb",
     "spec/yaml_load_spec.rb",
     "spec/yaml_utils_spec.rb",
@@ -40,7 +43,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/zweitag/yaml_db"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.17"
-  s.summary = "yaml_db allows export/import of database into/from yaml files"
+  s.summary = "yaml_db allows export/import of database into/from yaml/json files"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
