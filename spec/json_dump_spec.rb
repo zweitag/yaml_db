@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/base'
+require 'date'
 
 describe JsonDb::Dump do
 
@@ -44,5 +45,14 @@ describe JsonDb::Dump do
 		JsonDb::Dump.dump_table_records(@io, 'mytable')
 		@io.rewind
 		@io.read.should == '"records": [ [1,2],[3,4] ]'
+  end
+
+  it 'should dump datetime objects using custom Ruby serialization' do
+		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('datetime',:name => 'datetime', :type => :datetime)])
+		ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"1"})
+		ActiveRecord::Base.connection.stub!(:select_all).and_return([ { 'datetime' => DateTime.new(2014, 1, 1, 12, 20, 00) } ])
+		JsonDb::Dump.dump_table_records(@io, 'mytable')
+		@io.rewind
+		@io.read.should == '"records": [ [{"json_class":"DateTime","y":2014,"m":1,"d":1,"H":12,"M":20,"S":0,"of":"0/1","sg":2299161.0}] ]'
   end
 end

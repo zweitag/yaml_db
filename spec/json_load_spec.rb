@@ -30,4 +30,17 @@ describe JsonDb::Load do
 		JsonDb::Load.load(@io)
 	end
 
+  it "should load custom Ruby serialized datetime objects" do
+    @io = StringIO.new <<-EOYAML
+    {
+      "mytable": { 
+        "columns": [ "datetime" ], 
+        "records": [ [{"json_class":"DateTime","y":2014,"m":1,"d":1,"H":12,"M":20,"S":0,"of":"0/1","sg":2299161.0}] ]
+      }
+    }
+    EOYAML
+
+		JsonDb::Load.should_receive(:load_table).with('mytable', { 'columns' => [ 'datetime' ], 'records' => [ [DateTime.new(2014, 1, 1, 12, 20)] ] },true)
+		JsonDb::Load.load(@io)
+  end
 end

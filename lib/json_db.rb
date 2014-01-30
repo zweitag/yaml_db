@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'json'
+require 'json/add/core'
 require 'active_record'
 require 'serialization_helper'
 
