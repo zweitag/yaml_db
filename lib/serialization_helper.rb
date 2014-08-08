@@ -177,11 +177,16 @@ module SerializationHelper
       boolean_columns = SerializationHelper::Utils.boolean_columns(table)
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
 
-      (0..pages).to_a.each do |page|
+      (0..pages).to_a.each_with_index do |page, index|
         query = Arel::Table.new(table).order(id).skip(records_per_page*page).take(records_per_page).project(Arel.sql('*'))
         records = ActiveRecord::Base.connection.select_all(query)
         records = SerializationHelper::Utils.convert_booleans(records, boolean_columns)
-        yield records
+
+        page_types = []
+        page_types << :first if index == 0
+        page_types << :last if index == pages
+
+        yield records, page_types
       end
     end
 

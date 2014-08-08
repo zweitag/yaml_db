@@ -51,9 +51,10 @@ module JsonDb
 
       column_names = table_column_names(table)
 
-      each_table_page(table) do |records|
+      each_table_page(table) do |records, page_types|
         rows = SerializationHelper::Utils.unhash_records(records, column_names)
-        io.write JSON.dump(rows)[1..-2]      # without opening and closing brackets
+        io.write JSON.dump(rows)[1..-2]     # without opening and closing brackets
+        io.write ', ' unless :last.in? page_types
       end
 
       io.write ' ]'

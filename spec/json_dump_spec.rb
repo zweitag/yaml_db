@@ -47,6 +47,20 @@ describe JsonDb::Dump do
 		@io.read.should == '"records": [ [1,2],[3,4] ]'
   end
 
+  it 'should dump a valid json document for more than 1000 records' do
+		ActiveRecord::Base.connection.stub!(:tables).and_return(['mytable'])
+		ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"1001"})
+		ActiveRecord::Base.connection.stub!(:select_all).and_return([{'a'=>1, 'b'=>2}] * 1000, [{'a'=>1, 'b'=>2}])
+
+    JsonDb::Dump.dump(@io)
+    @io.rewind
+    expect { @json = JSON.load @io }.not_to raise_error
+
+    @json['mytable']['columns'].count.should == 2
+    @json['mytable']['records'].count.should == 1001
+    @json['mytable']['records'].should match_array([[1, 2]] * 1001)
+  end
+
   it 'should dump datetime objects using custom Ruby serialization' do
 		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('datetime',:name => 'datetime', :type => :datetime)])
 		ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"1"})
