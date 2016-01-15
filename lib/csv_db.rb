@@ -66,8 +66,8 @@ module CsvDb
 
       each_table_page(table) do |records|
         rows = SerializationHelper::Utils.unhash_records(records, column_names)
-        records.each do |record|
-          io.write(record.to_csv)
+        rows.each do |row|
+          io.write(row.to_csv)
         end
       end
     end
