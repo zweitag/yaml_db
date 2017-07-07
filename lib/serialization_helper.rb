@@ -62,7 +62,7 @@ module SerializationHelper
       ActiveRecord::Base.logger = @@old_logger
     end
   end
-  
+
   class Load
     def self.load(io, truncate = true)
       ActiveRecord::Base.connection.transaction do
@@ -71,14 +71,11 @@ module SerializationHelper
     end
 
     def self.truncate_table(table)
-      begin
-        ActiveRecord::Base.connection.execute("TRUNCATE #{SerializationHelper::Utils.quote_table(table)}")
-      rescue Exception
-        ActiveRecord::Base.connection.execute("DELETE FROM #{SerializationHelper::Utils.quote_table(table)}")
-      end
+      ActiveRecord::Base.connection.execute("DELETE FROM #{SerializationHelper::Utils.quote_table(table)}")
     end
 
     def self.load_table(table, data, truncate = true)
+      defer_fk_constraints(table)
       column_names = data['columns']
       if truncate
         truncate_table(table)
@@ -94,7 +91,7 @@ module SerializationHelper
       columns = column_names.map{|cn| ActiveRecord::Base.connection.columns(table).detect{|c| c.name == cn}}
       quoted_column_names = column_names.map { |column| ActiveRecord::Base.connection.quote_column_name(column) }.join(',')
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
-      
+
       0.step(records.count-1, records_per_page) do |offset|
         all_quoted_values = records[offset, records_per_page].map do |record|
           '(' + record.zip(columns).map{|c| ActiveRecord::Base.connection.quote(c.first, c.last)}.join(',') + ')'
@@ -107,9 +104,19 @@ module SerializationHelper
       if ActiveRecord::Base.connection.respond_to?(:reset_pk_sequence!)
         ActiveRecord::Base.connection.reset_pk_sequence!(table_name)
       end
-    end    
+    end
 
-      
+    def self.defer_fk_constraints(table)
+      quoted_table_name = SerializationHelper::Utils.quote_table(table)
+      fk_constraints = ActiveRecord::Base.connection.foreign_keys(table)
+      fk_constraints.each do |fk_constraint|
+        ActiveRecord::Base.connection.execute("ALTER TABLE #{quoted_table_name} ALTER CONSTRAINT #{fk_constraint.name} DEFERRABLE INITIALLY IMMEDIATE")
+      end
+      unless fk_constraints.empty?
+        ActiveRecord::Base.connection.execute("SET CONSTRAINTS #{fk_constraints.map(&:name).join(',')} DEFERRED")
+      end
+    end
+
   end
 
   module Utils
