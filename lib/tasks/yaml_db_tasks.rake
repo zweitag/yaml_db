@@ -1,3 +1,5 @@
+require 'zlib'
+
 namespace :db do
   desc "Dump schema and data to db/schema.rb and db/data.yml"
   task(:dump => [ "db:schema:dump", "db:data:dump" ])
@@ -22,7 +24,13 @@ namespace :db do
     desc "Dump contents of database to curr_dir_name/tablename.extension (defaults to yaml)"
     task :dump_dir => :environment do
       dir = ENV['dir'] || "#{Time.now.to_s.gsub(/ /, '_')}"
-      SerializationHelper::Base.new(helper).dump_to_dir dump_dir("/#{dir}")
+    end
+
+    desc "Dump gzipped contents of database to stdout"
+    task :dump_gzipped_stdout => :environment do
+      gz = Zlib::GzipWriter.new($stdout.dup)
+      SerializationHelper::Base.new(helper).dump_to_io gz
+      gz.close
     end
 
     desc "Load contents of db/data.extension (defaults to yaml) into database"
@@ -34,6 +42,13 @@ namespace :db do
     task :load_dir  => :environment do
       dir = ENV['dir'] || "base"
       SerializationHelper::Base.new(helper).load_from_dir dump_dir("/#{dir}")
+    end
+
+    desc "Load gzipped contents from stdin"
+    task :load_gzipped_stdin => :environment do
+      gz = Zlib::GzipReader.new($stdin.dup)
+      SerializationHelper::Base.new(helper).load_from_io gz
+      gz.close
     end
 
     def helper
