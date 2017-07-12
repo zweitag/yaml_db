@@ -22,8 +22,14 @@ module SerializationHelper
         io = File.new "#{dirname}/#{table}.#{@extension}", "w"
         @dumper.before_table(io, table)
         @dumper.dump_table io, table
-        @dumper.after_table(io, table)         
+        @dumper.after_table(io, table)
       end
+    end
+
+    def dump_to_io(io)
+      disable_logger
+      @dumper.dump(io)
+      reenable_logger
     end
 
     def load(filename, truncate = true)
@@ -38,7 +44,13 @@ module SerializationHelper
           next
         end
         @loader.load(File.new("#{dirname}/#{filename}", "r"), truncate)
-      end   
+      end
+    end
+
+    def load_from_io(io, truncate = true)
+      disable_logger
+      @loader.load(io, truncate)
+      reenable_logger
     end
 
     def disable_logger
