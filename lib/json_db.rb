@@ -62,11 +62,11 @@ module JsonDb
   end
 
   class Load < SerializationHelper::Load
-    def self.load_documents(io, truncate = true)
+    def self.load_documents(io)
         JSON.load(io).tap do |json|
           json.keys.each do |table_name|
             next if json[table_name].nil?
-            load_table(table_name, json[table_name], truncate)
+            load_table(table_name, json[table_name])
           end
         end
     end
