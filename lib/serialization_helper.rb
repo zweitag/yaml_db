@@ -79,6 +79,7 @@ module SerializationHelper
     end
 
     def self.load_table(table, data, truncate = true)
+      return if table == 'ar_internal_metadata'
       column_names = data['columns']
       if truncate
         truncate_table(table)
