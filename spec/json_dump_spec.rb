@@ -7,7 +7,7 @@ describe JsonDb::Dump do
 		silence_warnings { ActiveRecord::Base = mock('ActiveRecord::Base', :null_object => true) }
 		ActiveRecord::Base.stub(:connection).and_return(stub('connection').as_null_object)
 		ActiveRecord::Base.connection.stub!(:tables).and_return([ 'mytable', 'schema_info', 'schema_migrations' ])
-		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('a',:name => 'a', :type => :string), mock('b', :name => 'b', :type => :string) ])
+		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('a', name: 'a', type: :string, sql_type: 'text'), mock('b', name: 'b', type: :string, sql_type: 'text') ])
 		ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"2"})
 		ActiveRecord::Base.connection.stub!(:select_all).and_return([ { 'a' => 1, 'b' => 2 }, { 'a' => 3, 'b' => 4 } ])
 	end
@@ -18,7 +18,7 @@ describe JsonDb::Dump do
 	end
 
   it "should dump a valid json document with correct data" do
-		ActiveRecord::Base.connection.stub!(:columns).and_return([ mock('a',:name => 'a', :type => :string), mock('b', :name => 'b', :type => :string) ])
+		ActiveRecord::Base.connection.stub!(:columns).and_return([ mock('a', name: 'a', type: :string, sql_type: 'text'), mock('b', name: 'b', type: :string, sql_type: 'text') ])
 
     JsonDb::Dump.dump(@io)
     @io.rewind
@@ -62,7 +62,7 @@ describe JsonDb::Dump do
   end
 
   it 'should dump datetime objects using custom Ruby serialization' do
-		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('datetime',:name => 'datetime', :type => :datetime)])
+		ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('datetime', name: 'datetime', type: :datetime, sql_type: 'datetime')])
 		ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"1"})
 		ActiveRecord::Base.connection.stub!(:select_all).and_return([ { 'datetime' => DateTime.new(2014, 1, 1, 12, 20, 00) } ])
 		JsonDb::Dump.dump_table_records(@io, 'mytable')
