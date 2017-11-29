@@ -131,8 +131,23 @@ module SerializationHelper
       end
     end
 
+    def self.convert_jsons(records, columns)
+      records.map do |record|
+        columns.each do |column|
+          next if is_json(record[column])
+          record[column] = convert_json(record[column])
+        end
+        record
+      end
+    end
+
     def self.convert_boolean(value)
       ['t', '1', true, 1].include?(value)
+    end
+
+    def self.convert_json(value)
+      return nil if value.nil?
+      JSON.parse(value)
     end
 
     def self.boolean_columns(table)
@@ -140,8 +155,17 @@ module SerializationHelper
       columns.map { |c| c.name }
     end
 
+    def self.json_columns(table)
+      columns = ActiveRecord::Base.connection.columns(table).select { |c| c.sql_type == 'json' }
+      columns.map { |c| c.name }
+    end
+
     def self.is_boolean(value)
       value.kind_of?(TrueClass) or value.kind_of?(FalseClass)
+    end
+
+    def self.is_json(value)
+      value.kind_of?(Hash) or value.kind_of?(Array)
     end
 
     def self.quote_table(table)
@@ -188,12 +212,14 @@ module SerializationHelper
       pages = (total_count.to_f / records_per_page).ceil - 1
       id = table_column_names(table).first
       boolean_columns = SerializationHelper::Utils.boolean_columns(table)
+      json_columns = SerializationHelper::Utils.json_columns(table)
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
 
       (0..pages).to_a.each_with_index do |page, index|
         query = Arel::Table.new(table).order(id).skip(records_per_page*page).take(records_per_page).project(Arel.sql('*'))
         records = ActiveRecord::Base.connection.select_all(query)
         records = SerializationHelper::Utils.convert_booleans(records, boolean_columns)
+        records = SerializationHelper::Utils.convert_jsons(records, json_columns)
 
         page_types = []
         page_types << :first if index == 0

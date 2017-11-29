@@ -69,4 +69,13 @@ describe JsonDb::Dump do
 		@io.rewind
 		@io.read.should == '"records": [ [{"json_class":"DateTime","y":2014,"m":1,"d":1,"H":12,"M":20,"S":0,"of":"0/1","sg":2299161.0}] ]'
   end
+
+  it 'should correctly serialize json columns' do
+    ActiveRecord::Base.connection.stub!(:columns).with('mytable').and_return([ mock('json', name: 'json', type: :json, sql_type: 'json')])
+    ActiveRecord::Base.connection.stub!(:select_one).and_return({"count"=>"1"})
+    ActiveRecord::Base.connection.stub!(:select_all).and_return([ { 'json' => '[{"a":1},{"b":2}]' } ])
+    JsonDb::Dump.dump_table_records(@io, 'mytable')
+    @io.rewind
+    @io.read.should == '"records": [ [[{"a":1},{"b":2}]] ]'
+  end
 end
