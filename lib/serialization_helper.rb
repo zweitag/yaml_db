@@ -122,13 +122,13 @@ module SerializationHelper
     end
 
     def self.convert_booleans(records, columns)
-      records.each do |record|
+      records.map do |record|
         columns.each do |column|
           next if is_boolean(record[column])
           record[column] = convert_boolean(record[column])
         end
+        record
       end
-      records
     end
 
     def self.convert_boolean(value)
