@@ -1,0 +1,9 @@
+version: "3.3"
+
+services:
+  app:
+    image: ruby:2.3-onbuild
+    command: gem build yaml_db
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
