@@ -47,6 +47,14 @@ namespace :db do
     desc "Load gzipped contents from stdin"
     task :load_gzipped_stdin => :environment do
       gz = Zlib::GzipReader.new($stdin.dup)
+      # workaround for ruby < 2.3.0
+      unless gz.respond_to? :external_encoding
+        class << gz
+          def external_encoding
+            Encoding::UTF_8
+          end
+        end
+      end
       SerializationHelper::Base.new(helper).load_from_io gz
       gz.close
     end

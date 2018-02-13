@@ -62,28 +62,39 @@ module SerializationHelper
       ActiveRecord::Base.logger = @@old_logger
     end
   end
-  
+
   class Load
     def self.load(io, truncate = true)
       ActiveRecord::Base.connection.transaction do
-        load_documents(io, truncate)
+        defer_fk_constraints do
+          truncate_all if truncate
+          load_documents(io)
+        end
       end
     end
 
-    def self.truncate_table(table)
-      begin
-        ActiveRecord::Base.connection.execute("TRUNCATE #{SerializationHelper::Utils.quote_table(table)}")
-      rescue Exception
-        ActiveRecord::Base.connection.execute("DELETE FROM #{SerializationHelper::Utils.quote_table(table)}")
+    def self.truncate_all
+      quoted_tables = tables.map do |table|
+        SerializationHelper::Utils.quote_table(table)
+      end
+      case database_type
+      when :postgresql
+        ActiveRecord::Base.connection.execute("TRUNCATE #{quoted_tables.join(',')} CASCADE")
+      when :mysql
+        quoted_tables.each do |quoted_table|
+          ActiveRecord::Base.connection.execute("TRUNCATE #{quoted_table}")
+        end
       end
     end
 
-    def self.load_table(table, data, truncate = true)
+    def self.tables
+      ActiveRecord::Base.connection.tables
+    end
+
+
+    def self.load_table(table, data)
       return if table == 'ar_internal_metadata'
       column_names = data['columns']
-      if truncate
-        truncate_table(table)
-      end
       load_records(table, column_names, data['records'])
       reset_pk_sequence!(table)
     end
@@ -95,7 +106,7 @@ module SerializationHelper
       columns = column_names.map{|cn| ActiveRecord::Base.connection.columns(table).detect{|c| c.name == cn}}
       quoted_column_names = column_names.map { |column| ActiveRecord::Base.connection.quote_column_name(column) }.join(',')
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
-      
+
       0.step(records.count-1, records_per_page) do |offset|
         all_quoted_values = records[offset, records_per_page].map do |record|
           '(' + record.zip(columns).map{|c| ActiveRecord::Base.connection.quote(c.first, c.last)}.join(',') + ')'
@@ -108,9 +119,39 @@ module SerializationHelper
       if ActiveRecord::Base.connection.respond_to?(:reset_pk_sequence!)
         ActiveRecord::Base.connection.reset_pk_sequence!(table_name)
       end
-    end    
+    end
 
-      
+    def self.defer_fk_constraints(&block)
+      case database_type
+      when :postgresql
+        # make all fk constraints deferrable
+        fk_constraints = []
+        tables.each do |table|
+          fk_constraints_on_table = ActiveRecord::Base.connection.foreign_keys(table)
+          fk_constraints_on_table.each do |fk_constraint|
+            quoted_table_name = SerializationHelper::Utils.quote_table(table)
+            ActiveRecord::Base.connection.execute("ALTER TABLE #{quoted_table_name} ALTER CONSTRAINT #{fk_constraint.name} DEFERRABLE INITIALLY IMMEDIATE")
+          end
+          fk_constraints += fk_constraints_on_table
+        end
+        # defer all fk constraints
+        ActiveRecord::Base.connection.execute("SET CONSTRAINTS #{fk_constraints.collect(&:name).join(',')} DEFERRED")
+        yield block
+      when :mysql
+        ActiveRecord::Base.connection.execute("SET foreign_key_checks = 0")
+        yield block
+        ActiveRecord::Base.connection.execute("SET foreign_key_checks = 1")
+      end
+    end
+
+    def self.database_type
+      case ActiveRecord::Base.connection.class.name
+      when 'ActiveRecord::ConnectionAdapters::PostgreSQLAdapter'
+        :postgresql
+      when 'ActiveRecord::ConnectionAdapters::Mysql2Adapter', 'ActiveRecord::ConnectionAdapters::MysqlAdapter'
+        :mysql
+      end
+    end
   end
 
   module Utils

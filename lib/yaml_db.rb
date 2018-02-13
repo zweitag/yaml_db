@@ -56,11 +56,11 @@ module YamlDb
   end
 
   class Load < SerializationHelper::Load
-    def self.load_documents(io, truncate = true)
+    def self.load_documents(io)
         YAML.load_documents(io) do |ydoc|
           ydoc.keys.each do |table_name|
             next if ydoc[table_name].nil?
-            load_table(table_name, ydoc[table_name], truncate)
+            load_table(table_name, ydoc[table_name])
           end
         end
     end

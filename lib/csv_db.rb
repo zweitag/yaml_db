@@ -16,7 +16,7 @@ module CsvDb
   end
 
   class Load < SerializationHelper::Load
-    def self.load_documents(io, truncate = true)
+    def self.load_documents(io)
       tables = {}
       curr_table = nil
       io.each do |line|
@@ -34,7 +34,7 @@ module CsvDb
       end
 
       tables.each_pair do |table_name, contents|
-        load_table(table_name, contents, truncate)
+        load_table(table_name, contents)
       end
     end
   end
@@ -72,7 +72,7 @@ module CsvDb
         end
       end
     end
-    
+
   end
 
 
