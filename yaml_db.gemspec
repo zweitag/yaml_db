@@ -53,5 +53,7 @@ Gem::Specification.new do |s|
     end
   else
   end
+
+  s.add_dependency "msgpack", '~> 1.2.4'
 end
 
