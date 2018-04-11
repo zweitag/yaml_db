@@ -11,7 +11,7 @@ module SerializationHelper
 
     def dump(filename)
       disable_logger
-      @dumper.dump(File.new(filename, "w"))
+      @dumper.dump(File.new(filename, "wb"))
       reenable_logger
     end
 
@@ -141,6 +141,9 @@ module SerializationHelper
         ActiveRecord::Base.connection.execute("SET foreign_key_checks = 0")
         yield block
         ActiveRecord::Base.connection.execute("SET foreign_key_checks = 1")
+      else
+        # for testing purposes
+        yield block
       end
     end
 
