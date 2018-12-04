@@ -125,17 +125,15 @@ module SerializationHelper
       case database_type
       when :postgresql
         # make all fk constraints deferrable
-        fk_constraints = []
         tables.each do |table|
           fk_constraints_on_table = ActiveRecord::Base.connection.foreign_keys(table)
           fk_constraints_on_table.each do |fk_constraint|
             quoted_table_name = SerializationHelper::Utils.quote_table(table)
             ActiveRecord::Base.connection.execute("ALTER TABLE #{quoted_table_name} ALTER CONSTRAINT #{fk_constraint.name} DEFERRABLE INITIALLY IMMEDIATE")
           end
-          fk_constraints += fk_constraints_on_table
         end
         # defer all fk constraints
-        ActiveRecord::Base.connection.execute("SET CONSTRAINTS #{fk_constraints.collect(&:name).join(',')} DEFERRED")
+        ActiveRecord::Base.connection.execute("SET CONSTRAINTS ALL DEFERRED")
         yield block
       when :mysql
         ActiveRecord::Base.connection.execute("SET foreign_key_checks = 0")
