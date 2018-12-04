@@ -249,13 +249,13 @@ module SerializationHelper
     def self.each_table_page(table, records_per_page=1000)
       total_count = table_record_count(table)
       pages = (total_count.to_f / records_per_page).ceil - 1
-      id = table_column_names(table).first
+      keys = sort_key(table)
       boolean_columns = SerializationHelper::Utils.boolean_columns(table)
       json_columns = SerializationHelper::Utils.json_columns(table)
       quoted_table_name = SerializationHelper::Utils.quote_table(table)
 
       (0..pages).to_a.each_with_index do |page, index|
-        query = Arel::Table.new(table).order(id).skip(records_per_page*page).take(records_per_page).project(Arel.sql('*'))
+        query = Arel::Table.new(table).order(*keys).skip(records_per_page*page).take(records_per_page).project(Arel.sql('*'))
         records = ActiveRecord::Base.connection.select_all(query)
         records = SerializationHelper::Utils.convert_booleans(records, boolean_columns)
         records = SerializationHelper::Utils.convert_jsons(records, json_columns)
@@ -272,6 +272,17 @@ module SerializationHelper
       ActiveRecord::Base.connection.select_one("SELECT COUNT(*) FROM #{SerializationHelper::Utils.quote_table(table)}").values.first.to_i
     end
 
+    # Just return the first column as sort key unless the table looks like a
+    # standard HABTM join table, in which case add the second "id column"
+    def self.sort_key(table)
+      first_column, second_column = table_column_names(table)
+
+      if [first_column, second_column].all? { |name| name =~ /_id$/ }
+        [first_column, second_column]
+      else
+        first_column
+      end
+    end
   end
 
 end
