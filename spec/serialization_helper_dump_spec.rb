@@ -69,4 +69,17 @@ describe SerializationHelper::Dump do
     SerializationHelper::Dump.should_not_receive(:dump_table_records)
     SerializationHelper::Dump.dump_table(@io, 'mytable')
   end
+
+  describe ".sort_key" do
+    it "returns the first column as sort key" do
+      expect(SerializationHelper::Dump.sort_key('mytable')).to eq('a')
+    end
+    it "returns the combined ids as sort key if the table looks like a HABTM" do
+      allow(ActiveRecord::Base.connection).to receive(:columns).with('mytable').and_return([
+        double('a_id', :name => 'a_id', :type => :string),
+        double('b_id', :name => 'b_id', :type => :string)
+      ])
+      expect(Dump.sort_key('mytable')).to eq(['a_id', 'b_id'])
+    end
+  end
 end
