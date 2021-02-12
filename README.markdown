@@ -10,6 +10,10 @@ _This is a fork of the ludicast version which makes sure schema tables are being
 
 [![Build Status](https://secure.travis-ci.org/zweitag/yaml_db.png)](http://travis-ci.org/zweitag/yaml_db)
 
+## CI
+
+The CI travis.com is disabled because of our migration to Github Actions. If the project is reactivated or the code needs to be changed you should migrate the CI-steps to Github Actions.
+
 ## Installation
 
 Simply add to your Gemfile:
@@ -49,4 +53,3 @@ Created by Orion Henry and Adam Wiggins.  Major updates by Ricardo Chimal, Jr.
 Patches contributed by Michael Irwin, Tom Locke, and Tim Galeckas.
 
 Send questions, feedback, or patches to the Heroku mailing list: http://groups.google.com/group/heroku
-
